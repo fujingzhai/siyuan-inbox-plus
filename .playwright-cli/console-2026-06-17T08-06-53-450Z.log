@@ -1,0 +1,30 @@
+[     269ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:6806/check-auth?to=%2F:0
+[    8625ms] [LOG] 你好，插件！ @ plugin:siyuan-plugin-formatPainter:23
+[    8651ms] [LOG] 繁简体通用检索插件加载中... @ plugin:siyuan-unified-search:22
+[    8671ms] [LOG] [siyuan-inbox-plus] 2026/6/17 16:07:02 INFO: 启动思源inbox+ @ plugin:siyuan-inbox-plus:0
+[    8678ms] [LOG] 霞鹜文楷 &amp; Twemoji loaded @ plugin:siyuan-ttf-LXGWWenKaiGB-and-Twemoji:0
+[    8778ms] [LOG] [沉浸阅读] 仅在移动端生效 @ :20
+[    8779ms] [LOG] whenExist begin .layout__center @ :8
+[    8779ms] [LOG] whenExist begin #drag @ :8
+[    8860ms] [LOG] 代码片段管理器 插件已启用 @ plugin:snippets:46
+[    8863ms] [LOG] [siyuan-inbox-plus] 2026/6/17 16:07:02 INFO: Telegram 开始轮询，间隔： 60000 @ plugin:siyuan-inbox-plus:0
+[  176765ms] [LOG] 你好，插件！ @ plugin:siyuan-plugin-formatPainter:23
+[  176780ms] [LOG] 繁简体通用检索插件加载中... @ plugin:siyuan-unified-search:22
+[  176790ms] [LOG] [siyuan-inbox-plus] 2026/6/17 16:09:50 INFO: 启动思源inbox+ @ plugin:siyuan-inbox-plus:0
+[  176793ms] [LOG] 霞鹜文楷 &amp; Twemoji loaded @ plugin:siyuan-ttf-LXGWWenKaiGB-and-Twemoji:0
+[  176812ms] [LOG] [沉浸阅读] 仅在移动端生效 @ :20
+[  176812ms] [LOG] whenExist begin .layout__center @ :8
+[  176812ms] [LOG] whenExist begin #drag @ :8
+[  176846ms] [LOG] 代码片段管理器 插件已启用 @ plugin:snippets:46
+[  176848ms] [LOG] [siyuan-inbox-plus] 2026/6/17 16:09:50 INFO: Telegram 开始轮询，间隔： 60000 @ plugin:siyuan-inbox-plus:0
+[  243861ms] [ERROR] [siyuan-inbox-plus] 2026/6/17 16:10:57 ERROR: 无效的代理响应，请检查网络设置 null @ plugin:siyuan-inbox-plus:0
+[  244952ms] [LOG] 你好，插件！ @ plugin:siyuan-plugin-formatPainter:23
+[  244958ms] [LOG] 繁简体通用检索插件加载中... @ plugin:siyuan-unified-search:22
+[  244965ms] [LOG] [siyuan-inbox-plus] 2026/6/17 16:10:58 INFO: 启动思源inbox+ @ plugin:siyuan-inbox-plus:0
+[  244967ms] [LOG] 霞鹜文楷 &amp; Twemoji loaded @ plugin:siyuan-ttf-LXGWWenKaiGB-and-Twemoji:0
+[  244984ms] [LOG] [沉浸阅读] 仅在移动端生效 @ :20
+[  244984ms] [LOG] whenExist begin .layout__center @ :8
+[  244984ms] [LOG] whenExist begin #drag @ :8
+[  245032ms] [LOG] 代码片段管理器 插件已启用 @ plugin:snippets:46
+[  245033ms] [LOG] [siyuan-inbox-plus] 2026/6/17 16:10:58 INFO: Telegram 开始轮询，间隔： 60000 @ plugin:siyuan-inbox-plus:0
+[  250360ms] [ERROR] [siyuan-inbox-plus] 2026/6/17 16:11:03 ERROR: 无效的代理响应，请检查网络设置 null @ plugin:siyuan-inbox-plus:0

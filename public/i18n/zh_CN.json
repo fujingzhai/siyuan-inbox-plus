@@ -1,0 +1,87 @@
+{
+    "helloPlugin": "启动思源inbox+",
+    "byePlugin": "思源inbox+已卸载",
+    "settings": {
+        "inboxSectionTitle": "思源收集箱",
+        "tgSectionTitle": "Telegram 收集",
+        "targetDoc": {
+            "title": "短内容绑定文档",
+            "description": "未超过分流阈值的微信收集箱内容会写入这里。",
+            "current": "当前绑定",
+            "currentInvalid": "绑定无效",
+            "placeholder": "搜索并选择一篇思源文档",
+            "open": "打开",
+            "test": "测试",
+            "noResults": "没有匹配文档"
+        },
+        "telegramTargetDoc": {
+            "title": "绑定文档",
+            "description": "默认沿用短内容绑定文档，也可单独指定。",
+            "fallback": "默认沿用短内容绑定文档",
+            "current": "当前绑定",
+            "currentInvalid": "绑定无效",
+            "placeholder": "搜索并选择一篇思源文档",
+            "open": "打开",
+            "test": "测试",
+            "noResults": "没有匹配文档"
+        },
+        "botToken": {
+            "title": "Bot Token"
+        },
+        "pollingInterval": {
+            "title": "自动同步间隔（秒）",
+            "description": "设为 0 则停止自动轮询。"
+        },
+        "authorizedUser": {
+            "title": "授权用户名",
+            "description": "仅处理此 Telegram 用户名的消息，留空则接收所有。"
+        },
+        "inboxWordLimit": {
+            "title": "长内容分流阈值",
+            "description": "超过该字数按长内容处理；设为 0 则全部写入短内容绑定文档。"
+        },
+        "targetNotebook": {
+            "title": "长内容目标笔记本",
+            "description": "超过分流阈值的微信收集箱内容，会移入此笔记本并保存为独立文档。",
+            "placeholder": "选择目标笔记本",
+            "loading": "正在获取笔记本列表...",
+            "none": "不处理（仅保留在收集箱）"
+        },
+        "loadError": "加载设置失败"
+    },
+    "topBar": {
+        "title": "Inbox+",
+        "settings": "打开设置"
+    },
+    "commands": {
+        "refresh": "inbox+ 手动刷新"
+    },
+    "messages": {
+        "docBound": "已绑定目标文档",
+        "testMessage": "这是一条来自思源inbox+的测试消息。",
+        "testWritten": "测试消息已写入绑定文档",
+        "refreshRunning": "正在刷新，请稍候",
+        "refreshDone": "已写入 ${count} 条笔记",
+        "refreshChecked": "已检查消息",
+        "refreshEmpty": "没有新内容"
+    },
+    "errors": {
+        "noTargetDoc": "请先绑定一篇有效的思源文档",
+        "BotTokenRequiredError": "尚未设置 Telegram Bot Token",
+        "jsonParseError": "解析 JSON 错误",
+        "InvalidProxyResponseError": "无效的代理响应，请检查网络设置",
+        "GetMessagesError": "获取 Telegram 消息失败",
+        "ProcessingMessagesError": "处理 Telegram 消息失败",
+        "writeMessageError": "写入思源文档失败",
+        "manualRefreshError": "手动刷新失败",
+        "searchDocsError": "搜索思源文档失败"
+    },
+    "log": {
+        "startPolling": "Telegram 开始轮询，间隔：",
+        "stopPolling": "Telegram 停止轮询",
+        "telegramResponse": "Telegram 响应",
+        "unauthorizedUserMessage": "忽略来自未授权用户的消息",
+        "InstanceInitialized": "Telegram 实例初始化",
+        "InstanceTerminated": "Telegram 实例终止"
+    }
+}

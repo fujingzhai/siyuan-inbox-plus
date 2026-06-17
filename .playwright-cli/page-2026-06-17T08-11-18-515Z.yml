@@ -1,0 +1,228 @@
+- generic [active] [ref=e1]:
+  - img
+  - img:
+    - generic:
+      - img
+  - img
+  - img
+  - img
+  - img:
+    - generic:
+      - generic:
+        - generic: 繁簡
+  - img
+  - img
+  - img
+  - img
+  - generic:
+    - generic "主菜单 ⌥\\" [ref=e11] [cursor=pointer]:
+      - generic [ref=e12]: SiYuan
+      - img [ref=e13]
+    - generic "上传/下载文件数 12/2<br>&emsp;上传/下载分块数 8/0<br>&emsp;发送/接收字节数 261.64 kB/148.84 kB" [ref=e15] [cursor=pointer]:
+      - img [ref=e16]
+    - button "后退 ⌘[" [ref=e18]:
+      - img [ref=e19]
+    - button "前进 ⌘]" [ref=e21]:
+      - img [ref=e22]
+    - generic "收集箱"
+    - generic "搜 easy" [ref=e24] [cursor=pointer]:
+      - img [ref=e25]
+    - generic "inbox+ 刷新" [ref=e27] [cursor=pointer]:
+      - img [ref=e28]
+    - generic "插件" [ref=e30] [cursor=pointer]:
+      - img [ref=e31]
+    - generic "命令面板 ⌥⇧P" [ref=e33] [cursor=pointer]:
+      - img [ref=e34]
+    - generic "全局搜索 ⌘P" [ref=e36] [cursor=pointer]:
+      - img [ref=e37]
+    - generic "外观模式" [ref=e39] [cursor=pointer]:
+      - img [ref=e40]
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e42]:
+        - generic "<span style='white-space:pre'>文档树 ⌃1 单击 <span class='ft__on-surface ft__nowrap'>展开/最小化</span> 右键/拖拽 <span class='ft__on-surface ft__nowrap'>调整位置</span></span>" [ref=e43] [cursor=pointer]:
+          - img [ref=e44]
+        - generic "<span style='white-space:pre'>收集箱 ⌃6 单击 <span class='ft__on-surface ft__nowrap'>展开/最小化</span> 右键/拖拽 <span class='ft__on-surface ft__nowrap'>调整位置</span></span>" [ref=e46] [cursor=pointer]:
+          - img [ref=e47]
+        - generic "钉住" [ref=e49] [cursor=pointer]:
+          - img [ref=e50]
+      - generic [ref=e53]:
+        - generic "<span style='white-space:pre'>反向链接 ⌃7 单击 <span class='ft__on-surface ft__nowrap'>展开/最小化</span> 右键/拖拽 <span class='ft__on-surface ft__nowrap'>调整位置</span></span>" [ref=e54] [cursor=pointer]:
+          - img [ref=e55]
+        - generic "<span style='white-space:pre'>关系图 ⌃8 单击 <span class='ft__on-surface ft__nowrap'>展开/最小化</span> 右键/拖拽 <span class='ft__on-surface ft__nowrap'>调整位置</span></span>" [ref=e57] [cursor=pointer]:
+          - img [ref=e58]
+        - generic "<span style='white-space:pre'>全局关系图 ⌃9 单击 <span class='ft__on-surface ft__nowrap'>展开/最小化</span> 右键/拖拽 <span class='ft__on-surface ft__nowrap'>调整位置</span></span>" [ref=e60] [cursor=pointer]:
+          - img [ref=e61]
+    - generic [ref=e63]:
+      - generic [ref=e68]:
+        - generic [ref=e70]:
+          - img [ref=e71]
+          - text: 文档树
+        - generic [ref=e73]:
+          - list [ref=e74]:
+            - listitem [ref=e75] [cursor=pointer]:
+              - img [ref=e77]
+              - generic "修改图标" [ref=e79]: 📝
+              - generic [ref=e80]: 筆記盒
+          - list [ref=e81]:
+            - listitem [ref=e82] [cursor=pointer]:
+              - img [ref=e84]
+              - generic "修改图标" [ref=e86]: 💾
+              - generic [ref=e87]: 筆記庫
+          - list [ref=e88]:
+            - listitem [ref=e89] [cursor=pointer]:
+              - img [ref=e91]
+              - generic "修改图标" [ref=e93]: 🏫
+              - generic [ref=e94]: 學習
+          - list [ref=e95]:
+            - listitem [ref=e96] [cursor=pointer]:
+              - img [ref=e98]
+              - generic "修改图标" [ref=e100]: 🏢
+              - generic [ref=e101]: 工作
+          - list [ref=e102]:
+            - listitem [ref=e103] [cursor=pointer]:
+              - img [ref=e105]
+              - generic "修改图标" [ref=e107]: 🏘️
+              - generic [ref=e108]: 生活
+          - list [ref=e109]:
+            - listitem [ref=e110] [cursor=pointer]:
+              - img [ref=e112]
+              - generic "修改图标" [ref=e114]: 🗃
+              - generic [ref=e115]: 微信收集箱
+          - list [ref=e116]:
+            - listitem [ref=e117] [cursor=pointer]:
+              - img [ref=e119]
+              - generic "修改图标" [ref=e121]: 🗃
+              - generic [ref=e122]: AI收集箱
+          - list [ref=e123]:
+            - listitem [ref=e124] [cursor=pointer]:
+              - img [ref=e126]
+              - generic "修改图标" [ref=e128]: 🗳️
+              - generic [ref=e129]: 筆記箱
+      - generic [ref=e133]:
+        - generic [ref=e134]:
+          - list [ref=e135]:
+            - listitem [ref=e136] [cursor=pointer]:
+              - img [ref=e138]
+            - listitem [ref=e139] [cursor=pointer]:
+              - img [ref=e140]
+            - listitem [ref=e142] [cursor=pointer]:
+              - generic [ref=e143]: 🎓
+            - listitem [ref=e144] [cursor=pointer]:
+              - generic [ref=e145]: 王符《潛夫論》
+              - img [ref=e147]
+            - listitem [ref=e149] [cursor=pointer]:
+              - generic [ref=e150]: 17-三式
+              - img [ref=e152]
+            - listitem [ref=e154] [cursor=pointer]:
+              - generic [ref=e155]: 收集箱
+              - img [ref=e157]
+          - list [ref=e159]:
+            - listitem [ref=e160]:
+              - generic "新建文档" [ref=e161] [cursor=pointer]:
+                - img [ref=e162]
+              - generic "页签切换" [ref=e165] [cursor=pointer]:
+                - img [ref=e166]
+        - generic [ref=e169]:
+          - generic [ref=e170]:
+            - generic [ref=e171]:
+              - img [ref=e173] [cursor=pointer]
+              - img [ref=e175]
+              - img [ref=e178] [cursor=pointer]
+            - button "锁定编辑" [ref=e181] [cursor=pointer]:
+              - img [ref=e182]
+            - button "点击 <span class='ft__on-surface'>打开菜单</span><br>⇧点击 <span class='ft__on-surface'>修改属性</span>" [ref=e184] [cursor=pointer]:
+              - img [ref=e185]
+            - button "更多" [ref=e187] [cursor=pointer]:
+              - img [ref=e188]
+          - generic [ref=e190]:
+            - generic [ref=e191]:
+              - generic [ref=e194]:
+                - button "添加标签" [ref=e195] [cursor=pointer]:
+                  - img [ref=e196]
+                  - text: 添加标签
+                - button "添加图标" [ref=e198] [cursor=pointer]:
+                  - img [ref=e199]
+                  - text: 添加图标
+                - button "添加题头图" [ref=e201] [cursor=pointer]:
+                  - img [ref=e202]
+                  - text: 添加题头图
+              - generic [ref=e204]:
+                - generic "点击 <span class='ft__on-surface'>打开菜单</span><br>⇧点击 <span class='ft__on-surface'>修改属性</span>" [ref=e205] [cursor=pointer]:
+                  - img [ref=e206]
+                - generic [ref=e208]: 收集箱
+            - generic [ref=e209]:
+              - generic [ref=e212]: 2026-06-17 15:35 再来
+              - generic [ref=e215]: 2026-06-17 15:35 再来测试
+          - generic [ref=e218]:
+            - generic "⌘Home" [ref=e219] [cursor=pointer]:
+              - img [ref=e220]
+            - generic "⌘End" [ref=e222] [cursor=pointer]:
+              - img [ref=e223]
+      - generic [ref=e229]:
+        - generic [ref=e231]:
+          - img [ref=e232]
+          - text: 大纲
+        - generic "收集箱" [ref=e234] [cursor=pointer]:
+          - generic [ref=e235]: 📄
+          - generic [ref=e236]: 收集箱
+        - list [ref=e238]:
+          - listitem [ref=e239]: 未找到相关内容
+    - generic [ref=e9]:
+      - generic [ref=e241]:
+        - generic "<span style='white-space:pre'>大纲 ⌃2 单击 <span class='ft__on-surface ft__nowrap'>展开/最小化</span> 右键/拖拽 <span class='ft__on-surface ft__nowrap'>调整位置</span></span>" [ref=e242] [cursor=pointer]:
+          - img [ref=e243]
+        - generic "<span style='white-space:pre'>书签 ⌃3 单击 <span class='ft__on-surface ft__nowrap'>展开/最小化</span> 右键/拖拽 <span class='ft__on-surface ft__nowrap'>调整位置</span></span>" [ref=e245] [cursor=pointer]:
+          - img [ref=e246]
+        - generic "<span style='white-space:pre'>标签 ⌃4 单击 <span class='ft__on-surface ft__nowrap'>展开/最小化</span> 右键/拖拽 <span class='ft__on-surface ft__nowrap'>调整位置</span></span>" [ref=e248] [cursor=pointer]:
+          - img [ref=e249]
+        - generic "钉住" [ref=e251] [cursor=pointer]:
+          - img [ref=e252]
+      - generic "<span style='white-space:pre'>Claude Note 单击 <span class='ft__on-surface ft__nowrap'>展开/最小化</span> 右键/拖拽 <span class='ft__on-surface ft__nowrap'>调整位置</span></span>" [ref=e256] [cursor=pointer]:
+        - img [ref=e257]
+  - generic [ref=e260]:
+    - button "管理" [ref=e261] [cursor=pointer]:
+      - img [ref=e262]
+      - generic [ref=e264]: 管理
+    - button [ref=e265]
+    - button "霞鹜文楷 & Twemoji" [ref=e266] [cursor=pointer]:
+      - img [ref=e267]
+      - generic [ref=e269]: 霞鹜文楷 & Twemoji
+    - button "代码片段管理器" [ref=e270] [cursor=pointer]:
+      - img [ref=e271]
+      - generic [ref=e273]: 代码片段管理器
+      - img [ref=e274]
+    - button "繁简体通用检索" [ref=e276] [cursor=pointer]:
+      - img [ref=e277]
+      - generic [ref=e279]: 繁简体通用检索
+      - img [ref=e280]
+    - button "中文转换" [ref=e282] [cursor=pointer]:
+      - img [ref=e283]
+      - generic [ref=e285]: 中文转换
+    - button "Claude Note" [ref=e286] [cursor=pointer]:
+      - img [ref=e287]
+      - generic [ref=e289]: Claude Note
+    - button "日程块" [ref=e290] [cursor=pointer]:
+      - img [ref=e291]
+      - generic [ref=e293]: 日程块
+      - img [ref=e294]
+    - button "搜 easy" [ref=e296] [cursor=pointer]:
+      - img [ref=e297]
+      - generic [ref=e299]: 搜 easy
+      - img [ref=e300]
+    - button "股票块" [ref=e302] [cursor=pointer]:
+      - img [ref=e303]
+      - generic [ref=e305]: 股票块
+      - img [ref=e306]
+    - button "记账块" [ref=e308] [cursor=pointer]:
+      - img [ref=e309]
+      - generic [ref=e311]: 记账块
+      - img [ref=e312]
+    - button "inbox+ 刷新" [ref=e314] [cursor=pointer]:
+      - img [ref=e315]
+      - generic [ref=e317]: inbox+ 刷新
+      - img [ref=e318]
+  - generic [ref=e320]:
+    - generic [ref=e321]: "forward request failed: Post \"https://api.telegram.org/bot8658290642:AAGkUl619O2Ehk5fbKoApf596BfArDm9yds/getUpdates\": EOF v3.6.5 ❗"
+    - img [ref=e322] [cursor=pointer]
+  - generic [ref=e324]: 插件

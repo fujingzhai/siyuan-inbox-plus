@@ -1,0 +1,87 @@
+{
+    "helloPlugin": "Started SiYuan Inbox+",
+    "byePlugin": "SiYuan Inbox+ unloaded",
+    "settings": {
+        "inboxSectionTitle": "SiYuan Inbox",
+        "tgSectionTitle": "Telegram Collect",
+        "targetDoc": {
+            "title": "Short Content Document",
+            "description": "Inbox items below the routing threshold are written here.",
+            "current": "Current target",
+            "currentInvalid": "Invalid target",
+            "placeholder": "Search and bind a SiYuan document",
+            "open": "Open",
+            "test": "Test",
+            "noResults": "No matching document"
+        },
+        "telegramTargetDoc": {
+            "title": "Bound Document",
+            "description": "Uses the short content document by default; optionally bind another document.",
+            "fallback": "Using short content document",
+            "current": "Current target",
+            "currentInvalid": "Invalid target",
+            "placeholder": "Search and bind a SiYuan document",
+            "open": "Open",
+            "test": "Test",
+            "noResults": "No matching document"
+        },
+        "botToken": {
+            "title": "Bot Token"
+        },
+        "pollingInterval": {
+            "title": "Auto Sync Interval (seconds)",
+            "description": "Set to 0 to stop auto-polling."
+        },
+        "authorizedUser": {
+            "title": "Authorized Username",
+            "description": "Only process messages from this Telegram username. Leave blank for all."
+        },
+        "inboxWordLimit": {
+            "title": "Long Content Routing Threshold",
+            "description": "Items above this character count are long content. Set to 0 to write all items into the short content document."
+        },
+        "targetNotebook": {
+            "title": "Long Content Notebook",
+            "description": "Items above the routing threshold are moved into this notebook as individual documents.",
+            "placeholder": "Select target notebook",
+            "loading": "Fetching notebooks...",
+            "none": "Do not process (keep in Siyuan Inbox)"
+        },
+        "loadError": "Failed to load settings"
+    },
+    "topBar": {
+        "title": "Inbox+",
+        "settings": "Open settings"
+    },
+    "commands": {
+        "refresh": "Inbox+ Manual Refresh"
+    },
+    "messages": {
+        "docBound": "Target document bound",
+        "testMessage": "This is a test message from SiYuan Inbox+.",
+        "testWritten": "Test message written to bound document",
+        "refreshRunning": "Refresh is already running",
+        "refreshDone": "Wrote ${count} note(s)",
+        "refreshChecked": "Checked messages",
+        "refreshEmpty": "No new content"
+    },
+    "errors": {
+        "noTargetDoc": "Bind a valid SiYuan document first",
+        "BotTokenRequiredError": "Telegram Bot Token is not configured",
+        "jsonParseError": "Error parsing JSON",
+        "InvalidProxyResponseError": "Invalid proxy response. Please check network settings.",
+        "GetMessagesError": "Failed to get Telegram messages",
+        "ProcessingMessagesError": "Failed to process Telegram messages",
+        "writeMessageError": "Failed to write into SiYuan document",
+        "manualRefreshError": "Manual refresh failed",
+        "searchDocsError": "Failed to search SiYuan documents"
+    },
+    "log": {
+        "startPolling": "Telegram start polling with interval:",
+        "stopPolling": "Telegram stop polling",
+        "telegramResponse": "Telegram response",
+        "unauthorizedUserMessage": "Ignore messages from unauthorized user",
+        "InstanceInitialized": "Telegram instance initialized",
+        "InstanceTerminated": "Telegram instance terminated"
+    }
+}
