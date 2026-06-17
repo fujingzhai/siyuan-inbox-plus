@@ -344,6 +344,7 @@ export class SettingUtils {
         // 不能用元素的 textContent 覆盖，否则会清掉真正的设置值
         if (item?.type === 'hint') return;
         let element = this.elements.get(key) as any;
+        if (!element) return;
         item.value = valueOf(element);
         // switch (item.type) {
         //     case 'checkbox':
