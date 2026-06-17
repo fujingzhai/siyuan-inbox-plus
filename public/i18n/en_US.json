@@ -44,6 +44,14 @@
             "description": "Only process messages from this Telegram user. Leave blank for all.",
             "placeholder": "Username / User ID"
         },
+        "telegramApiUrl": {
+            "title": "Telegram API Base URL",
+            "description": "Default is https://api.telegram.org. If you experience connection timeouts, you can enter a custom reverse proxy address here."
+        },
+        "telegramRequestMode": {
+            "title": "Telegram Request Mode",
+            "description": "direct: Uses native fetch (recommended, silent, uses system proxy); proxy: Uses Siyuan kernel proxy (use only if you configured proxy inside Siyuan)."
+        },
         "inboxWordLimit": {
             "title": "Long Content Routing Threshold",
             "description": "Items above this character count are long content. Set to 0 to write all items into the short content document."
@@ -82,7 +90,8 @@
         "ProcessingMessagesError": "Failed to process Telegram messages",
         "writeMessageError": "Failed to write into SiYuan document",
         "manualRefreshError": "Manual refresh failed",
-        "searchDocsError": "Failed to search SiYuan documents"
+        "searchDocsError": "Failed to search SiYuan documents",
+        "syncSuspended": "Telegram sync failed continuously and has been suspended to prevent annoying error windows. Click [Manual Refresh] to reactivate when the connection is restored."
     },
     "log": {
         "startPolling": "Telegram start polling with interval:",

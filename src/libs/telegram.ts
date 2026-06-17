@@ -9,6 +9,8 @@ export class Telegram {
   botToken: string;
   updateId: number;
   authorizedUser: string;
+  telegramApiUrl: string;
+  telegramRequestMode: "direct" | "proxy";
   i18n: any;
   callback: (messages: ITelegramResponse | null, error?: Error) => Promise<void> | void;
 
@@ -17,6 +19,8 @@ export class Telegram {
     pollingInterval?: number;
     updateId?: number;
     authorizedUser?: string;
+    telegramApiUrl?: string;
+    telegramRequestMode?: "direct" | "proxy";
     i18n?: any;
     callback: (messages: ITelegramResponse | null, error?: Error) => Promise<void> | void;
   }) {
@@ -36,6 +40,8 @@ export class Telegram {
     this.botToken = opts.botToken;
     this.updateId = opts.updateId || 0;
     this.authorizedUser = opts.authorizedUser || "";
+    this.telegramApiUrl = opts.telegramApiUrl || "https://api.telegram.org";
+    this.telegramRequestMode = opts.telegramRequestMode || "direct";
     this.callback = opts.callback;
 
     log.debug(this.i18n.log.InstanceInitialized, {
@@ -43,6 +49,8 @@ export class Telegram {
       botToken: this.botToken,
       updateId: this.updateId,
       authorizedUser: this.authorizedUser,
+      telegramApiUrl: this.telegramApiUrl,
+      telegramRequestMode: this.telegramRequestMode,
     });
   }
 
@@ -65,6 +73,75 @@ export class Telegram {
     this.stop();
     while (this.isProcessing) {
       await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+
+  private async requestTelegram(
+    path: string,
+    method: "GET" | "POST",
+    payload: any = {}
+  ): Promise<any> {
+    const baseUrl = this.telegramApiUrl.trim().replace(/\/+$/, "");
+    const mode = this.telegramRequestMode || "direct";
+    const url = `${baseUrl}${path}`;
+    const timeout = 10000; // 10s timeout
+
+    if (mode === "direct") {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        log.debug(`[fetch-direct] Sending request to Telegram: ${url}`, payload);
+        const options: RequestInit = {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          signal: controller.signal,
+        };
+
+        if (method === "POST") {
+          options.body = JSON.stringify(payload);
+        }
+
+        const response = await window.fetch(url, options);
+        clearTimeout(timer);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const text = await response.text();
+        return JSON.parse(text);
+      } catch (err: any) {
+        clearTimeout(timer);
+        const isAbort = err.name === "AbortError";
+        const errMsg = isAbort ? "Connection timeout (10s)" : err.message;
+        log.error(`[fetch-direct] Native fetch failed for ${url}:`, errMsg);
+        throw new Error(errMsg);
+      }
+    } else {
+      log.debug(`[fetch-proxy] Sending request via Siyuan: ${url}`, payload);
+      try {
+        const proxyResponse = await forwardProxy(
+          url,
+          method,
+          payload,
+          [],
+          timeout,
+          "application/json"
+        );
+
+        if (proxyResponse && proxyResponse.body && proxyResponse.status === 200) {
+          return JSON.parse(proxyResponse.body);
+        } else {
+          const detail = proxyResponse ? `status: ${proxyResponse.status}` : "empty response";
+          throw new Error(`Invalid proxy response (${detail})`);
+        }
+      } catch (err: any) {
+        log.error(`[fetch-proxy] Siyuan proxy request failed:`, err);
+        throw err;
+      }
     }
   }
 
@@ -130,36 +207,69 @@ export class Telegram {
     });
 
     const contentType = mime_type;
+    const mode = this.telegramRequestMode || "direct";
 
     try {
-      const proxyGetFileResponse = await forwardProxy(
-        `https://api.telegram.org/bot${this.botToken}/getFile?file_id=${file_id}`,
-        "GET",
-        {},
-        [],
-        7000,
-        "application/json"
+      const getFileResponseResult = await this.requestTelegram(
+        `/bot${this.botToken}/getFile?file_id=${file_id}`,
+        "GET"
       );
 
-      const getFileResponse: ITelegramFileResponse = JSON.parse(
-        proxyGetFileResponse.body
-      ).result;
+      if (!getFileResponseResult || !getFileResponseResult.result) {
+        throw new Error("Failed to get file info from Telegram API");
+      }
+
+      const getFileResponse: ITelegramFileResponse = getFileResponseResult.result;
       log.debug("getFileResponse", getFileResponse);
       const file_path = getFileResponse.file_path;
 
-      const proxyDownloadFileResponse = await forwardProxy(
-        `https://api.telegram.org/file/bot${this.botToken}/${file_path}`,
-        "GET",
-        {},
-        [],
-        7000,
-        "application/json",
-        "base64"
-      );
+      let blob: Blob;
 
-      const decodedData = Buffer.from(proxyDownloadFileResponse.body, "base64");
-      const uint8 = new Uint8Array(decodedData);
-      const blob = new Blob([uint8], { type: contentType });
+      if (mode === "direct") {
+        const baseUrl = this.telegramApiUrl.trim().replace(/\/+$/, "");
+        const downloadUrl = `${baseUrl}/file/bot${this.botToken}/${file_path}`;
+        log.debug(`[download-direct] Downloading file: ${downloadUrl}`);
+        const controller = new AbortController();
+        const downloadTimer = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+        try {
+          const downloadResponse = await window.fetch(downloadUrl, {
+            signal: controller.signal,
+          });
+          clearTimeout(downloadTimer);
+
+          if (!downloadResponse.ok) {
+            throw new Error(`Download HTTP error! status: ${downloadResponse.status}`);
+          }
+          blob = await downloadResponse.blob();
+        } catch (err: any) {
+          clearTimeout(downloadTimer);
+          throw err;
+        }
+      } else {
+        const baseUrl = this.telegramApiUrl.trim().replace(/\/+$/, "");
+        const downloadUrl = `${baseUrl}/file/bot${this.botToken}/${file_path}`;
+        log.debug(`[download-proxy] Downloading file via Siyuan: ${downloadUrl}`);
+        const proxyDownloadFileResponse = await forwardProxy(
+          downloadUrl,
+          "GET",
+          {},
+          [],
+          15000,
+          "application/json",
+          "base64"
+        );
+
+        if (proxyDownloadFileResponse && proxyDownloadFileResponse.body && proxyDownloadFileResponse.status === 200) {
+          const decodedData = Buffer.from(proxyDownloadFileResponse.body, "base64");
+          const uint8 = new Uint8Array(decodedData);
+          blob = new Blob([uint8], { type: contentType });
+        } else {
+          const detail = proxyDownloadFileResponse ? `status: ${proxyDownloadFileResponse.status}` : "empty response";
+          throw new Error(`Download file via Siyuan proxy failed (${detail})`);
+        }
+      }
+
       const file = new File([blob], file_name, { type: contentType });
 
       const uploadResult = await upload("/assets/", [file]);
@@ -193,66 +303,51 @@ export class Telegram {
       : { limit: 100 };
 
     try {
-      const proxyResponse = await forwardProxy(
-        `https://api.telegram.org/bot${this.botToken}/getUpdates`,
+      const telegramResponse = await this.requestTelegram(
+        `/bot${this.botToken}/getUpdates`,
         "POST",
-        payload,
-        [],
-        7000,
-        "application/json"
+        payload
       );
 
-      if (proxyResponse && proxyResponse.body && proxyResponse.status === 200) {
-        let telegramResponse;
-        try {
-          telegramResponse = JSON.parse(proxyResponse.body);
-        } catch (error) {
-          log.error(this.i18n.errors.jsonParseError, error);
-          return null;
-        }
-        log.debug(this.i18n.log.telegramResponse, telegramResponse);
-
-        if (telegramResponse.ok) {
-          const messagePromises = telegramResponse.result.map(
-            async (element: IUpdate) => {
-              updateId = element.update_id;
-              const message = element.message;
-              if (message && message.date && message.from) {
-                if (!this.isAuthorized(message.from)) {
-                  log.warn(this.i18n.log.unauthorizedUserMessage, element);
-                  return null; // Return null for unauthorized messages
-                }
-
-                const attachments = [];
-                attachments.push(...(await this.handleFile(message)));
-
-                const text = message.text || message.caption || "";
-                if (!text && attachments.length === 0) return;
-
-                const result = {
-                  id: message.message_id,
-                  updateId,
-                  date: message.date,
-                  chatId: message.chat.id,
-                  text,
-                  attachments,
-                };
-
-                log.debug("getInboxMessages", result);
-
-                return result;
+      if (telegramResponse && telegramResponse.ok) {
+        const messagePromises = telegramResponse.result.map(
+          async (element: IUpdate) => {
+            updateId = element.update_id;
+            const message = element.message;
+            if (message && message.date && message.from) {
+              if (!this.isAuthorized(message.from)) {
+                log.warn(this.i18n.log.unauthorizedUserMessage, element);
+                return null; // Return null for unauthorized messages
               }
-              return null;
-            }
-          );
 
-          const processedMessages = await Promise.all(messagePromises);
-          messages = processedMessages.filter(Boolean);
-        } else {
-          return null;
-        }
+              const attachments = [];
+              attachments.push(...(await this.handleFile(message)));
+
+              const text = message.text || message.caption || "";
+              if (!text && attachments.length === 0) return;
+
+              const result = {
+                id: message.message_id,
+                updateId,
+                date: message.date,
+                chatId: message.chat.id,
+                text,
+                attachments,
+              };
+
+              log.debug("getInboxMessages", result);
+
+              return result;
+            }
+            return null;
+          }
+        );
+
+        const processedMessages = await Promise.all(messagePromises);
+        messages = processedMessages.filter(Boolean);
       } else {
-        log.error(this.i18n.errors.InvalidProxyResponseError, proxyResponse);
+        const errMsg = telegramResponse ? JSON.stringify(telegramResponse) : "unknown error";
+        log.error(`Telegram response not OK: ${errMsg}`);
         return null;
       }
     } catch (error) {
