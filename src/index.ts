@@ -43,6 +43,8 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
   private inboxTimer: ReturnType<typeof setInterval> | null = null;
   private scheduledTimer: ReturnType<typeof setInterval> | null = null;
   private lastSyncedMinute = "";
+  private continuousFailures = 0;
+  private isPollSuspended = false;
 
   async onload() {
     log.info(this.i18n.helloPlugin);
@@ -218,6 +220,37 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
     } as any);
 
     this.settingUtils.addItem({
+      key: "telegramApiUrl",
+      value: "https://api.telegram.org",
+      type: "textinput",
+      title: this.i18n.settings.telegramApiUrl.title,
+      description: this.i18n.settings.telegramApiUrl.description,
+      placeholder: "https://api.telegram.org",
+      action: {
+        callback: () => {
+          this.settingUtils.takeAndSave("telegramApiUrl");
+        },
+      },
+    });
+
+    this.settingUtils.addItem({
+      key: "telegramRequestMode",
+      value: "direct",
+      type: "select",
+      title: this.i18n.settings.telegramRequestMode.title,
+      description: this.i18n.settings.telegramRequestMode.description,
+      options: {
+        direct: "direct (Native Fetch)",
+        proxy: "proxy (Siyuan Kernel)",
+      },
+      action: {
+        callback: () => {
+          this.settingUtils.takeAndSave("telegramRequestMode");
+        },
+      },
+    });
+
+    this.settingUtils.addItem({
       key: "telegramTargetDocId",
       value: "",
       type: "hint",
@@ -293,6 +326,8 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
   }
 
   private async applySyncControl() {
+    this.continuousFailures = 0;
+    this.isPollSuspended = false;
     await this.restartTelegram();
     this.startInboxPolling();
     this.startScheduledSyncChecking();
@@ -301,6 +336,10 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
   private async runAutomaticSync(reason: string) {
     if (this.isManualSyncing) {
       log.info("Automatic sync skipped because another sync is running:", reason);
+      return;
+    }
+    if (this.isPollSuspended) {
+      log.debug("Automatic sync skipped because Telegram polling is suspended due to continuous errors:", reason);
       return;
     }
     log.info("Automatic sync tick:", reason);
@@ -321,6 +360,8 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
 
     this.telegram = new Telegram({
       botToken,
+      telegramApiUrl: String(this.settingUtils.get("telegramApiUrl") || "https://api.telegram.org").trim(),
+      telegramRequestMode: (this.settingUtils.get("telegramRequestMode") as any) || "direct",
       updateId: this.getStorage().updateId,
       pollingInterval: 0,
       authorizedUser: this.settingUtils.get("authorizedUser"),
@@ -336,6 +377,9 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       this.showUIMessage(this.i18n.messages.refreshRunning, 2500, "info");
       return;
     }
+
+    this.continuousFailures = 0;
+    this.isPollSuspended = false;
 
     this.isManualSyncing = true;
 
@@ -1397,8 +1441,23 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
           await this.restartTelegram();
         }
         if (this.telegram) {
-          resTG = await this.telegram.getInboxMessages();
-          tgMessages = resTG?.messages || [];
+          try {
+            resTG = await this.telegram.getInboxMessages();
+            tgMessages = resTG?.messages || [];
+            this.continuousFailures = 0;
+          } catch (e) {
+            this.continuousFailures++;
+            log.warn(`Continuous Telegram sync failures: ${this.continuousFailures}`, e);
+            if (this.continuousFailures >= 3) {
+              this.isPollSuspended = true;
+              this.showUIMessage(
+                this.i18n.errors.syncSuspended || "Telegram 收集箱连续 3 次连接超时，已自动挂起后台同步。请检查网络，或更换 [设置 - Telegram API 基础地址]，随后通过 [手动刷新] 重新激活自动同步。",
+                8000,
+                "error"
+              );
+            }
+            throw e;
+          }
         }
       }
 

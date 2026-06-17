@@ -44,6 +44,14 @@
             "description": "仅处理此 Telegram 用户的消息，留空则接收所有。",
             "placeholder": "用户名 / 用户ID"
         },
+        "telegramApiUrl": {
+            "title": "Telegram API 基础地址",
+            "description": "默认 https://api.telegram.org。如因网络导致超时报错，可在此填入自定义反向代理地址。"
+        },
+        "telegramRequestMode": {
+            "title": "Telegram 网络请求方式",
+            "description": "direct：使用原生 fetch 请求（推荐，支持系统代理，静默无弹窗）；proxy：使用思源内核中转（仅用于配置了思源内置网络代理且没有全局代理的情况）。"
+        },
         "inboxWordLimit": {
             "title": "长内容分流阈值",
             "description": "超过该字数按长内容处理；设为 0 则全部写入短内容绑定文档。"
@@ -82,7 +90,8 @@
         "ProcessingMessagesError": "处理 Telegram 消息失败",
         "writeMessageError": "写入思源文档失败",
         "manualRefreshError": "手动刷新失败",
-        "searchDocsError": "搜索思源文档失败"
+        "searchDocsError": "搜索思源文档失败",
+        "syncSuspended": "Telegram 收集箱连续多次连接失败，已自动挂起后台同步，避免频繁弹窗打扰。网络恢复后请点击 [手动刷新] 重新激活。"
     },
     "log": {
         "startPolling": "Telegram 开始轮询，间隔：",
