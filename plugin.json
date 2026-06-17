@@ -1,0 +1,28 @@
+{
+  "name": "siyuan-inbox-plus",
+  "author": "游夏",
+  "url": "",
+  "version": "0.1.2",
+  "minAppVersion": "3.0.0",
+  "backends": [
+    "all"
+  ],
+  "frontends": [
+    "all"
+  ],
+  "displayName": {
+    "default": "SiYuan Inbox+",
+    "zh_CN": "思源Inbox+"
+  },
+  "description": {
+    "default": "Sync Telegram messages and SiYuan Inbox items into native notes, with short and long content routing.",
+    "zh_CN": "将 Telegram 与思源收集箱内容同步到原生笔记，支持短内容写入与长内容分流。"
+  },
+  "readme": {
+    "default": "README.md",
+    "zh_CN": "README_zh_CN.md"
+  },
+  "keywords": [
+    "telegram", "inbox", "shorthand", "plugin", "收集箱", "同步", "导入"
+  ]
+}
