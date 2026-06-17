@@ -16,8 +16,8 @@
         },
         "telegramTargetDoc": {
             "title": "绑定文档",
-            "description": "默认沿用短内容绑定文档，也可单独指定。",
-            "fallback": "默认沿用短内容绑定文档",
+            "description": "默认沿用收集箱短内容绑定文档，也可单独指定。",
+            "fallback": "默认沿用收集箱短内容绑定文档",
             "current": "当前绑定",
             "currentInvalid": "绑定无效",
             "placeholder": "搜索并选择一篇思源文档",
@@ -28,13 +28,21 @@
         "botToken": {
             "title": "Bot Token"
         },
-        "pollingInterval": {
-            "title": "自动同步间隔（秒）",
-            "description": "设为 0 则停止自动轮询。"
+        "syncSettingsRow": {
+            "title": "同步控制",
+            "modeLabel": "同步方式",
+            "modeInterval": "自动轮询",
+            "modeScheduled": "每日定时",
+            "modeManual": "手动刷新",
+            "intervalPlaceholder": "例如: 60",
+            "schedulePlaceholder": "例: 09:00,21:00 (逗号分隔)",
+            "manualPlaceholder": "已禁用自动同步，仅手动刷新",
+            "seconds": "秒"
         },
         "authorizedUser": {
-            "title": "授权用户名",
-            "description": "仅处理此 Telegram 用户名的消息，留空则接收所有。"
+            "title": "授权用户",
+            "description": "仅处理此 Telegram 用户的消息，留空则接收所有。",
+            "placeholder": "用户名 / 用户ID"
         },
         "inboxWordLimit": {
             "title": "长内容分流阈值",
