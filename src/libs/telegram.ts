@@ -100,12 +100,29 @@ export class Telegram {
     return username !== "" && username === target;
   }
 
-  async handleFile(message): Promise<IMessageAttachment[]> {
-    if (!message || !message.document) {
+  async handleFile(message: any): Promise<IMessageAttachment[]> {
+    if (!message) {
       return [];
     }
 
-    const { file_name, mime_type, file_id } = message.document;
+    let file_name = "";
+    let mime_type = "";
+    let file_id = "";
+
+    if (message.document) {
+      file_name = message.document.file_name;
+      mime_type = message.document.mime_type;
+      file_id = message.document.file_id;
+    } else if (message.photo && Array.isArray(message.photo) && message.photo.length > 0) {
+      // 获取最大尺寸的图片
+      const photo = message.photo[message.photo.length - 1];
+      file_id = photo.file_id;
+      mime_type = "image/jpeg";
+      file_name = `photo_${Date.now()}_${photo.file_id.substring(0, 8)}.jpg`;
+    } else {
+      return [];
+    }
+
     log.debug("handleFile", {
       fileName: file_name,
       mimeType: mime_type,
@@ -203,14 +220,15 @@ export class Telegram {
                 const attachments = [];
                 attachments.push(...(await this.handleFile(message)));
 
-                if (!message.text && attachments.length === 0) return;
+                const text = message.text || message.caption || "";
+                if (!text && attachments.length === 0) return;
 
                 const result = {
                   id: message.message_id,
                   updateId,
                   date: message.date,
                   chatId: message.chat.id,
-                  text: message.text,
+                  text,
                   attachments,
                 };
 

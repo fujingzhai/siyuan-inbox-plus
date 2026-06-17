@@ -8,7 +8,7 @@ interface ITelegramResponse {
     updateId: number;
     date: number;
     chatId: number;
-    text: string;
+    text?: string;
     attachments: IMessageAttachment[];
   }
 
@@ -28,7 +28,8 @@ interface ITelegramResponse {
     update_id: number;
     message?: {
       date: number;
-      text: string;
+      text?: string;
+      caption?: string;
       from: {
         id: number;
         username?: string;
@@ -37,15 +38,22 @@ interface ITelegramResponse {
         id: number;
       };
       message_id: number;
-      document: {
+      document?: {
         file_name: string;
         mime_type: string;
         file_id: string;
-      }
+      };
+      photo?: {
+        file_id: string;
+        file_unique_id: string;
+        width: number;
+        height: number;
+        file_size?: number;
+      }[];
     };
     channel_post?: {
       date: number;
-      text: string;
+      text?: string;
       chat: {
         id: number;
       };
@@ -56,3 +64,4 @@ interface ITelegramResponse {
     offset?: number;
     limit?: number;
   }
+
