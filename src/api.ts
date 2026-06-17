@@ -158,6 +158,20 @@ export async function upload(assetsDirPath: string, files: any[]): Promise<IResU
         form.append('file[]', file);
     }
     let url = '/api/asset/upload';
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: form
+        });
+        if (response.ok) {
+            const res = await response.json();
+            return res.code === 0 ? res.data : null;
+        }
+    } catch (err) {
+        console.warn("[siyuan-inbox-plus] Native fetch upload failed, falling back to fetchSyncPost...", err);
+    }
+
     return request(url, form);
 }
 

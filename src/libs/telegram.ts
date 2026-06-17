@@ -158,11 +158,17 @@ export class Telegram {
       );
 
       const decodedData = Buffer.from(proxyDownloadFileResponse.body, "base64");
-      const blob = new Blob([decodedData], { type: contentType });
+      const uint8 = new Uint8Array(decodedData);
+      const blob = new Blob([uint8], { type: contentType });
       const file = new File([blob], file_name, { type: contentType });
 
       const uploadResult = await upload("/assets/", [file]);
       log.debug("uploadResult", uploadResult);
+
+      if (!uploadResult || !uploadResult.succMap) {
+        log.error("Upload file failed or succMap is empty:", uploadResult);
+        return [];
+      }
 
       const assets: IMessageAttachment[] = Object.entries(uploadResult.succMap).map(
         ([key, value]) => ({
