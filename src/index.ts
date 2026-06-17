@@ -273,9 +273,9 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
         return;
       }
       try {
-        await this.pullSiYuanInbox();
+        await this.triggerBackgroundSync();
       } catch (e) {
-        log.error("Automatic sync SiYuan inbox failed:", e);
+        log.error("Automatic sync failed:", e);
       }
     }, interval * 1000);
   }
@@ -295,19 +295,13 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
     this.telegram = new Telegram({
       botToken,
       updateId: this.getStorage().updateId,
-      pollingInterval: String(this.settingUtils.get("syncMode") || "interval") === "interval"
-        ? Math.max(0, Number(this.settingUtils.get("pollingInterval") || 0)) * 1000
-        : 0,
+      pollingInterval: 0,
       authorizedUser: this.settingUtils.get("authorizedUser"),
       i18n: this.i18n,
       callback: async (res) => {
         await this.handleTelegramResponse(res);
       },
     });
-
-    if (String(this.settingUtils.get("syncMode") || "interval") === "interval") {
-      this.telegram.start();
-    }
   }
 
   private async manualRefresh() {
@@ -350,6 +344,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       // 4. 更新 Telegram 状态
       if (resTG && resTG.updateId !== undefined) {
         this.telegram?.setUpdateId(resTG.updateId);
+        await this.persistUpdateId(resTG.updateId);
       }
 
       const totalCount = syncRes.shortCount + syncRes.longCount;
