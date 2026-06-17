@@ -353,7 +353,12 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
   private telegramText(message: IMessagesList): string {
     const parts = [message.text || ""];
     for (const attachment of message.attachments || []) {
-      parts.push(`[${attachment.fileName}](${attachment.path})`);
+      const isImage = /\.(png|jpe?g|gif|webp|bmp)$/i.test(attachment.path || "");
+      if (isImage) {
+        parts.push(`![${attachment.fileName}](${attachment.path})`);
+      } else {
+        parts.push(`[${attachment.fileName}](${attachment.path})`);
+      }
     }
     return parts.filter(Boolean).join("\n");
   }
