@@ -55,9 +55,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       plugin: this,
       name: SETTINGS_STORAGE_NAME,
       callback: () => {
-        this.restartTelegram();
-        this.startInboxPolling();
-        this.startScheduledSyncChecking();
+        this.applySyncControl();
       },
       width: "760px",
       height: "auto",
@@ -69,10 +67,13 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
   onLayoutReady() {
     this.settingUtils
       .load()
-      .then(async () => {
-        // 向前兼容与迁移：如果 syncMode 还没在本地数据中（第一次升级），则根据原 interval/scheduled 自动推导
-        let currentMode = this.settingUtils.get("syncMode");
-        if (currentMode === undefined || currentMode === null) {
+      .then(async (loadedSettings) => {
+        // 向前兼容与迁移：第一次升级时补齐新同步控制项。
+        const loaded = (loadedSettings || {}) as Record<string, any>;
+        const hasSyncMode = Object.prototype.hasOwnProperty.call(loaded, "syncMode");
+        const hasPollingInterval = Object.prototype.hasOwnProperty.call(loaded, "pollingInterval");
+        const hasScheduledTime = Object.prototype.hasOwnProperty.call(loaded, "scheduledTime");
+        if (!hasSyncMode) {
           const interval = Math.max(0, Number(this.settingUtils.get("pollingInterval") ?? 60));
           const scheduled = String(this.settingUtils.get("scheduledTime") ?? "").trim();
           let inferred = "interval";
@@ -81,12 +82,19 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
           } else if (interval === 0 && !scheduled) {
             inferred = "manual";
           }
-          await this.settingUtils.setAndSave("syncMode", inferred);
+          this.settingUtils.set("syncMode", inferred);
+        }
+        if (!hasPollingInterval) {
+          this.settingUtils.set("pollingInterval", 60);
+        }
+        if (!hasScheduledTime) {
+          this.settingUtils.set("scheduledTime", "");
+        }
+        if (!hasSyncMode || !hasPollingInterval || !hasScheduledTime) {
+          await this.settingUtils.save();
         }
 
-        this.restartTelegram();
-        this.startInboxPolling();
-        this.startScheduledSyncChecking();
+        await this.applySyncControl();
       })
       .catch((error) => {
         log.error(this.i18n.settings.loadError, error);
@@ -268,16 +276,35 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       return;
     }
 
+    log.info("Automatic sync polling started:", `${interval}s`);
+    window.setTimeout(() => {
+      this.runAutomaticSync("interval-start").catch((e) => {
+        log.error("Initial automatic sync failed:", e);
+      });
+    }, 1000);
+
     this.inboxTimer = setInterval(async () => {
-      if (this.isManualSyncing) {
-        return;
-      }
       try {
-        await this.triggerBackgroundSync();
+        await this.runAutomaticSync("interval");
       } catch (e) {
         log.error("Automatic sync failed:", e);
       }
     }, interval * 1000);
+  }
+
+  private async applySyncControl() {
+    await this.restartTelegram();
+    this.startInboxPolling();
+    this.startScheduledSyncChecking();
+  }
+
+  private async runAutomaticSync(reason: string) {
+    if (this.isManualSyncing) {
+      log.info("Automatic sync skipped because another sync is running:", reason);
+      return;
+    }
+    log.info("Automatic sync tick:", reason);
+    await this.triggerBackgroundSync(reason);
   }
 
   // ─── Telegram ──────────────────────────────────────────────
@@ -1258,7 +1285,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       }
 
       // 重启相应的同步服务
-      this.restartTelegram();
+      await this.restartTelegram();
       this.startInboxPolling();
       this.startScheduledSyncChecking();
     };
@@ -1350,13 +1377,13 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
     }, 30000);
   }
 
-  private async triggerBackgroundSync() {
+  private async triggerBackgroundSync(reason = "scheduled") {
     if (this.isManualSyncing) {
       return;
     }
 
     this.isManualSyncing = true;
-    log.info("Background scheduled sync started...");
+    log.info("Background sync started:", reason);
 
     try {
       let tgMessages: IMessagesList[] = [];

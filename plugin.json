@@ -2,7 +2,7 @@
   "name": "siyuan-inbox-plus",
   "author": "游夏",
   "url": "https://github.com/fujingzhai/siyuan-inbox-plus",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "minAppVersion": "3.0.0",
   "backends": [
     "all"
