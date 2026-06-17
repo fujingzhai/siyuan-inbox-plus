@@ -290,6 +290,9 @@ export class SettingUtils {
                 let textInputElement: HTMLInputElement = document.createElement('input');
                 textInputElement.className = 'b3-text-field fn__flex-center fn__size200';
                 textInputElement.value = item.value;
+                if ((item as any).placeholder) {
+                    textInputElement.placeholder = (item as any).placeholder;
+                }
                 textInputElement.onchange = item.action?.callback ?? (() => { });
                 itemElement = textInputElement;
 

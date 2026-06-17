@@ -16,8 +16,8 @@
         },
         "telegramTargetDoc": {
             "title": "Bound Document",
-            "description": "Uses the short content document by default; optionally bind another document.",
-            "fallback": "Using short content document",
+            "description": "Uses the Siyuan Inbox short content document by default; optionally bind another document.",
+            "fallback": "Using Siyuan Inbox short content document",
             "current": "Current target",
             "currentInvalid": "Invalid target",
             "placeholder": "Search and bind a SiYuan document",
@@ -28,13 +28,21 @@
         "botToken": {
             "title": "Bot Token"
         },
-        "pollingInterval": {
-            "title": "Auto Sync Interval (seconds)",
-            "description": "Set to 0 to stop auto-polling."
+        "syncSettingsRow": {
+            "title": "Sync Control",
+            "modeLabel": "Sync Mode",
+            "modeInterval": "Auto Polling",
+            "modeScheduled": "Daily Scheduled",
+            "modeManual": "Manual Refresh",
+            "intervalPlaceholder": "e.g., 60",
+            "schedulePlaceholder": "e.g., 09:00,21:00 (comma separated)",
+            "manualPlaceholder": "Auto sync disabled",
+            "seconds": "s"
         },
         "authorizedUser": {
-            "title": "Authorized Username",
-            "description": "Only process messages from this Telegram username. Leave blank for all."
+            "title": "Authorized User",
+            "description": "Only process messages from this Telegram user. Leave blank for all.",
+            "placeholder": "Username / User ID"
         },
         "inboxWordLimit": {
             "title": "Long Content Routing Threshold",
