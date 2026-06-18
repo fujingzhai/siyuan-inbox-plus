@@ -78,6 +78,8 @@
         "testWritten": "测试消息已写入绑定文档",
         "refreshRunning": "正在刷新，请稍候",
         "refreshDone": "已写入 ${count} 条笔记",
+        "refreshDoneShort": "已写入 ${count} 条笔记",
+        "refreshDoneLong": "已导入 ${count} 篇笔记",
         "refreshChecked": "已检查消息",
         "refreshEmpty": "没有新内容"
     },

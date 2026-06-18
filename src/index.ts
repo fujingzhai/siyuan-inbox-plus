@@ -40,6 +40,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
   private settingUtils: SettingUtils;
   private telegram?: Telegram;
   private isManualSyncing = false;
+  private topBarElement?: HTMLElement;
   private inboxTimer: ReturnType<typeof setInterval> | null = null;
   private scheduledTimer: ReturnType<typeof setInterval> | null = null;
   private lastSyncedMinute = "";
@@ -267,7 +268,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
   // ─── Top Bar ───────────────────────────────────────────────
 
   private addTopBarEntry() {
-    this.addTopBar({
+    this.topBarElement = this.addTopBar({
       icon: "iconInboxPlus",
       title: this.i18n.topBar.title,
       position: "right",
@@ -372,6 +373,55 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
     });
   }
 
+  private getTopBarElement(): HTMLElement | null {
+    if (this.topBarElement) {
+      return this.topBarElement;
+    }
+    const svgEl = document.querySelector('svg use[*|href="#iconInboxPlus"], svg use[href="#iconInboxPlus"]');
+    if (svgEl) {
+      const btn = svgEl.closest(".toolbar__item") || svgEl.closest("button") || svgEl.parentElement;
+      if (btn) {
+        this.topBarElement = btn as HTMLElement;
+        return this.topBarElement;
+      }
+    }
+    return null;
+  }
+
+  private setSyncingState(syncing: boolean) {
+    this.isManualSyncing = syncing;
+    const el = this.getTopBarElement();
+    if (el) {
+      const svgEl = el.querySelector("svg");
+      if (syncing) {
+        svgEl?.classList.add("inbox-plus-syncing");
+        el.classList.add("inbox-plus-syncing-btn");
+      } else {
+        svgEl?.classList.remove("inbox-plus-syncing");
+        el.classList.remove("inbox-plus-syncing-btn");
+      }
+    }
+  }
+
+  private getRefreshDoneMessage(shortCount: number, longCount: number): string {
+    const messages = this.i18n.messages;
+    const shortText = messages.refreshDoneShort || "已写入 ${count} 条笔记";
+    const longText = messages.refreshDoneLong || "已导入 ${count} 篇笔记";
+
+    if (shortCount > 0 && longCount > 0) {
+      const part1 = shortText.replace("${count}", String(shortCount));
+      const part2 = longText.replace("${count}", String(longCount));
+      const isChinese = shortText.includes("已写入") || longText.includes("已导入");
+      const separator = isChinese ? "，" : ", ";
+      return `${part1}${separator}${part2}`;
+    } else if (shortCount > 0) {
+      return shortText.replace("${count}", String(shortCount));
+    } else if (longCount > 0) {
+      return longText.replace("${count}", String(longCount));
+    }
+    return messages.refreshEmpty || "没有新内容";
+  }
+
   private async manualRefresh() {
     if (this.isManualSyncing) {
       this.showUIMessage(this.i18n.messages.refreshRunning, 2500, "info");
@@ -381,7 +431,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
     this.continuousFailures = 0;
     this.isPollSuspended = false;
 
-    this.isManualSyncing = true;
+    this.setSyncingState(true);
 
     try {
       let tgMessages: IMessagesList[] = [];
@@ -422,7 +472,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       if (totalCount > 0) {
         setTimeout(() => this.refreshInboxUI(), 100);
         this.showUIMessage(
-          this.i18n.messages.refreshDone.replace("${count}", String(totalCount)),
+          this.getRefreshDoneMessage(syncRes.shortCount, syncRes.longCount),
           3000,
           "info"
         );
@@ -433,7 +483,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       log.error(this.i18n.errors.manualRefreshError, error);
       this.showUIMessage(this.i18n.errors.manualRefreshError, 4000, "error");
     } finally {
-      this.isManualSyncing = false;
+      this.setSyncingState(false);
     }
   }
 
@@ -1162,6 +1212,29 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
         border: 1px solid var(--b3-border-color, rgba(0,0,0,0.08));
         border-radius: 6px;
       }
+
+      @keyframes inbox-plus-glow {
+        0% {
+          color: currentColor;
+          filter: drop-shadow(0 0 1px rgba(253, 216, 53, 0));
+          opacity: 0.8;
+        }
+        50% {
+          color: #fdd835 !important;
+          filter: drop-shadow(0 0 6px #fdd835) drop-shadow(0 0 12px rgba(253, 216, 53, 0.6));
+          opacity: 1;
+        }
+        100% {
+          color: currentColor;
+          filter: drop-shadow(0 0 1px rgba(253, 216, 53, 0));
+          opacity: 0.8;
+        }
+      }
+      .inbox-plus-syncing {
+        animation: inbox-plus-glow 1.5s infinite ease-in-out;
+        transform-origin: center;
+        transition: color 0.3s ease, filter 0.3s ease;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -1426,7 +1499,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       return;
     }
 
-    this.isManualSyncing = true;
+    this.setSyncingState(true);
     log.info("Background sync started:", reason);
 
     try {
@@ -1483,7 +1556,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       if (totalCount > 0) {
         setTimeout(() => this.refreshInboxUI(), 100);
         this.showUIMessage(
-          this.i18n.messages.refreshDone.replace("${count}", String(totalCount)),
+          this.getRefreshDoneMessage(syncRes.shortCount, syncRes.longCount),
           3000,
           "info"
         );
@@ -1491,7 +1564,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
     } catch (error) {
       log.error("Background scheduled sync failed:", error);
     } finally {
-      this.isManualSyncing = false;
+      this.setSyncingState(false);
     }
   }
 
