@@ -1213,27 +1213,64 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
         border-radius: 6px;
       }
 
-      @keyframes inbox-plus-glow {
-        0% {
-          color: currentColor;
-          filter: drop-shadow(0 0 1px rgba(253, 216, 53, 0));
-          opacity: 0.8;
+      @keyframes inbox-plus-icon-breathe {
+        0%, 100% {
+          transform: scale(0.94);
+          filter: drop-shadow(0 0 2px rgba(255, 193, 7, 0.35));
+          opacity: 0.86;
         }
         50% {
-          color: #fdd835 !important;
-          filter: drop-shadow(0 0 6px #fdd835) drop-shadow(0 0 12px rgba(253, 216, 53, 0.6));
+          transform: scale(1.12);
+          filter:
+            drop-shadow(0 0 4px rgba(255, 214, 64, 1))
+            drop-shadow(0 0 9px rgba(255, 179, 0, 0.85));
           opacity: 1;
         }
-        100% {
-          color: currentColor;
-          filter: drop-shadow(0 0 1px rgba(253, 216, 53, 0));
-          opacity: 0.8;
+      }
+
+      @keyframes inbox-plus-halo-breathe {
+        0%, 100% {
+          background: rgba(255, 193, 7, 0.08);
+          box-shadow:
+            0 0 0 1px rgba(255, 193, 7, 0.12),
+            0 0 0 0 rgba(255, 193, 7, 0);
+        }
+        50% {
+          background: rgba(255, 193, 7, 0.2);
+          box-shadow:
+            0 0 0 1px rgba(255, 193, 7, 0.36),
+            0 0 0 5px rgba(255, 193, 7, 0.1),
+            0 0 14px rgba(255, 179, 0, 0.32);
         }
       }
+
+      .inbox-plus-syncing-btn {
+        border-radius: 6px;
+        color: #f9a825 !important;
+        animation: inbox-plus-halo-breathe 1.15s infinite ease-in-out;
+        transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+      }
+
       .inbox-plus-syncing {
-        animation: inbox-plus-glow 1.5s infinite ease-in-out;
+        color: #f9a825 !important;
+        animation: inbox-plus-icon-breathe 1.15s infinite ease-in-out;
         transform-origin: center;
-        transition: color 0.3s ease, filter 0.3s ease;
+        will-change: transform, filter, opacity;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .inbox-plus-syncing-btn {
+          animation: none;
+          background: rgba(255, 193, 7, 0.18);
+          box-shadow:
+            0 0 0 1px rgba(255, 193, 7, 0.32),
+            0 0 10px rgba(255, 179, 0, 0.26);
+        }
+
+        .inbox-plus-syncing {
+          animation: none;
+          filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.8));
+        }
       }
     `;
     document.head.appendChild(style);
