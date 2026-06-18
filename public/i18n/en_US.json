@@ -78,6 +78,8 @@
         "testWritten": "Test message written to bound document",
         "refreshRunning": "Refresh is already running",
         "refreshDone": "Wrote ${count} note(s)",
+        "refreshDoneShort": "Wrote ${count} note(s)",
+        "refreshDoneLong": "Imported ${count} note(s)",
         "refreshChecked": "Checked messages",
         "refreshEmpty": "No new content"
     },
