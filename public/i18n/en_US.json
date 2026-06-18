@@ -45,12 +45,14 @@
             "placeholder": "Username / User ID"
         },
         "telegramApiUrl": {
-            "title": "Telegram API Base URL",
-            "description": "Default is https://api.telegram.org. If you experience connection timeouts, you can enter a custom reverse proxy address here."
+            "title": "Base URL",
+            "description": "Uses Telegram by default; an HTTPS proxy URL is also supported."
         },
         "telegramRequestMode": {
-            "title": "Telegram Request Mode",
-            "description": "direct: Uses native fetch (recommended, silent, uses system proxy); proxy: Uses Siyuan kernel proxy (use only if you configured proxy inside Siyuan)."
+            "title": "Request Mode",
+            "description": "Use Direct normally, or Kernel Proxy with SiYuan proxy settings.",
+            "direct": "Direct (Recommended)",
+            "proxy": "SiYuan Kernel Proxy"
         },
         "inboxWordLimit": {
             "title": "Long Content Routing Threshold",
@@ -81,7 +83,8 @@
         "refreshDoneShort": "Wrote ${count} note(s)",
         "refreshDoneLong": "Imported ${count} note(s)",
         "refreshChecked": "Checked messages",
-        "refreshEmpty": "No new content"
+        "refreshEmpty": "No new content",
+        "telegramFailedInboxContinued": "Telegram failed; SiYuan Inbox was still processed"
     },
     "errors": {
         "noTargetDoc": "Bind a valid SiYuan document first",
@@ -93,7 +96,8 @@
         "writeMessageError": "Failed to write into SiYuan document",
         "manualRefreshError": "Manual refresh failed",
         "searchDocsError": "Failed to search SiYuan documents",
-        "syncSuspended": "Telegram sync failed continuously and has been suspended to prevent annoying error windows. Click [Manual Refresh] to reactivate when the connection is restored."
+        "syncSuspended": "Telegram background sync was paused after repeated failures; SiYuan Inbox will continue syncing.",
+        "invalidTelegramApiUrl": "Invalid base URL; restored the official Telegram address"
     },
     "log": {
         "startPolling": "Telegram start polling with interval:",

@@ -1,6 +1,10 @@
 import { Plugin, showMessage, openTab } from "siyuan";
 import { SettingUtils } from "./libs/setting-utils";
-import { Telegram } from "./libs/telegram";
+import {
+  Telegram,
+  normalizeTelegramApiUrl,
+  normalizeTelegramRequestMode,
+} from "./libs/telegram";
 import {
   getBlockByID,
   prependBlock,
@@ -241,8 +245,8 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       title: this.i18n.settings.telegramRequestMode.title,
       description: this.i18n.settings.telegramRequestMode.description,
       options: {
-        direct: "direct (Native Fetch)",
-        proxy: "proxy (Siyuan Kernel)",
+        direct: this.i18n.settings.telegramRequestMode.direct,
+        proxy: this.i18n.settings.telegramRequestMode.proxy,
       },
       action: {
         callback: () => {
@@ -339,10 +343,6 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       log.info("Automatic sync skipped because another sync is running:", reason);
       return;
     }
-    if (this.isPollSuspended) {
-      log.debug("Automatic sync skipped because Telegram polling is suspended due to continuous errors:", reason);
-      return;
-    }
     log.info("Automatic sync tick:", reason);
     await this.triggerBackgroundSync(reason);
   }
@@ -359,10 +359,22 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       return;
     }
 
+    let telegramApiUrl: string;
+    try {
+      telegramApiUrl = normalizeTelegramApiUrl(this.settingUtils.get("telegramApiUrl"));
+    } catch {
+      telegramApiUrl = "https://api.telegram.org";
+      this.settingUtils.set("telegramApiUrl", telegramApiUrl);
+      await this.settingUtils.save();
+      this.showUIMessage(this.i18n.errors.invalidTelegramApiUrl, 5000, "error");
+    }
+    const telegramRequestMode = normalizeTelegramRequestMode(this.settingUtils.get("telegramRequestMode"));
+    this.settingUtils.set("telegramRequestMode", telegramRequestMode);
+
     this.telegram = new Telegram({
       botToken,
-      telegramApiUrl: String(this.settingUtils.get("telegramApiUrl") || "https://api.telegram.org").trim(),
-      telegramRequestMode: (this.settingUtils.get("telegramRequestMode") as any) || "direct",
+      telegramApiUrl,
+      telegramRequestMode,
       updateId: this.getStorage().updateId,
       pollingInterval: 0,
       authorizedUser: this.settingUtils.get("authorizedUser"),
@@ -440,13 +452,19 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       // 1. 获取 Telegram 消息
       const botToken = this.settingUtils.get("botToken");
       let resTG = null;
+      let telegramFailed = false;
       if (botToken) {
         if (!this.telegram) {
           await this.restartTelegram();
         }
         if (this.telegram) {
-          resTG = await this.telegram.getInboxMessages();
-          tgMessages = resTG?.messages || [];
+          try {
+            resTG = await this.telegram.getInboxMessages();
+            tgMessages = resTG?.messages || [];
+          } catch (error) {
+            telegramFailed = true;
+            log.warn("Telegram manual sync failed; continuing with SiYuan Inbox:", error);
+          }
         }
       }
 
@@ -476,6 +494,8 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
           3000,
           "info"
         );
+      } else if (telegramFailed) {
+        this.showUIMessage(this.i18n.messages.telegramFailedInboxContinued, 4000, "error");
       } else {
         this.showUIMessage(this.i18n.messages.refreshEmpty, 3000, "info");
       }
@@ -1546,7 +1566,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       // 1. Get TG messages
       const botToken = this.settingUtils.get("botToken");
       let resTG = null;
-      if (botToken) {
+      if (botToken && !this.isPollSuspended) {
         if (!this.telegram) {
           await this.restartTelegram();
         }
@@ -1561,14 +1581,16 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
             if (this.continuousFailures >= 3) {
               this.isPollSuspended = true;
               this.showUIMessage(
-                this.i18n.errors.syncSuspended || "Telegram 收集箱连续 3 次连接超时，已自动挂起后台同步。请检查网络，或更换 [设置 - Telegram API 基础地址]，随后通过 [手动刷新] 重新激活自动同步。",
+                this.i18n.errors.syncSuspended || "Telegram 连续连接失败，已暂停 Telegram 后台同步；思源收集箱仍会继续同步。",
                 8000,
                 "error"
               );
             }
-            throw e;
+            log.warn("Telegram background sync failed; continuing with SiYuan Inbox");
           }
         }
+      } else if (botToken && this.isPollSuspended) {
+        log.debug("Telegram polling is suspended; continuing with SiYuan Inbox:", reason);
       }
 
       // 2. Get Siyuan Inbox Shorthands

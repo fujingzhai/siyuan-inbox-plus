@@ -1,6 +1,6 @@
 {
   "name": "siyuan-inbox-plus",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "type": "module",
   "description": "Sync Telegram messages and SiYuan Inbox items into native SiYuan notes.",
   "repository": "",

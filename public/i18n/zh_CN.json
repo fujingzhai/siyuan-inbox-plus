@@ -45,12 +45,14 @@
             "placeholder": "用户名 / 用户ID"
         },
         "telegramApiUrl": {
-            "title": "Telegram API 基础地址",
-            "description": "默认 https://api.telegram.org。如因网络导致超时报错，可在此填入自定义反向代理地址。"
+            "title": "基础地址",
+            "description": "默认使用 Telegram 官方地址，也可填写 HTTPS 代理地址。"
         },
         "telegramRequestMode": {
-            "title": "Telegram 网络请求方式",
-            "description": "direct：使用原生 fetch 请求（推荐，支持系统代理，静默无弹窗）；proxy：使用思源内核中转（仅用于配置了思源内置网络代理且没有全局代理的情况）。"
+            "title": "网络请求方式",
+            "description": "通常选择直连；使用思源代理时选择内核代理。",
+            "direct": "直连（推荐）",
+            "proxy": "思源内核代理"
         },
         "inboxWordLimit": {
             "title": "长内容分流阈值",
@@ -81,7 +83,8 @@
         "refreshDoneShort": "已写入 ${count} 条笔记",
         "refreshDoneLong": "已导入 ${count} 篇笔记",
         "refreshChecked": "已检查消息",
-        "refreshEmpty": "没有新内容"
+        "refreshEmpty": "没有新内容",
+        "telegramFailedInboxContinued": "Telegram 获取失败，已继续处理思源收集箱"
     },
     "errors": {
         "noTargetDoc": "请先绑定一篇有效的思源文档",
@@ -93,7 +96,8 @@
         "writeMessageError": "写入思源文档失败",
         "manualRefreshError": "手动刷新失败",
         "searchDocsError": "搜索思源文档失败",
-        "syncSuspended": "Telegram 收集箱连续多次连接失败，已自动挂起后台同步，避免频繁弹窗打扰。网络恢复后请点击 [手动刷新] 重新激活。"
+        "syncSuspended": "Telegram 连续连接失败，已暂停 Telegram 后台同步；思源收集箱仍会继续同步。",
+        "invalidTelegramApiUrl": "基础地址无效，已恢复为 Telegram 官方地址"
     },
     "log": {
         "startPolling": "Telegram 开始轮询，间隔：",

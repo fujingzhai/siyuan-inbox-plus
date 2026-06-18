@@ -2,6 +2,22 @@ import { forwardProxy, upload } from "../api";
 import log from "./logger";
 import { BotTokenRequiredError } from "./errors";
 
+export type TelegramRequestMode = "direct" | "proxy";
+
+export function normalizeTelegramRequestMode(value: unknown): TelegramRequestMode {
+  return value === "proxy" ? "proxy" : "direct";
+}
+
+export function normalizeTelegramApiUrl(value: unknown): string {
+  const raw = String(value || "https://api.telegram.org").trim();
+  const parsed = new URL(raw);
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.search || parsed.hash) {
+    throw new Error("Invalid Telegram API base URL");
+  }
+  parsed.pathname = parsed.pathname.replace(/\/+$/, "");
+  return parsed.toString().replace(/\/+$/, "");
+}
+
 export class Telegram {
   pollingInterval: number;
   isProcessing: boolean;
@@ -10,7 +26,7 @@ export class Telegram {
   updateId: number;
   authorizedUser: string;
   telegramApiUrl: string;
-  telegramRequestMode: "direct" | "proxy";
+  telegramRequestMode: TelegramRequestMode;
   i18n: any;
   callback: (messages: ITelegramResponse | null, error?: Error) => Promise<void> | void;
 
@@ -20,7 +36,7 @@ export class Telegram {
     updateId?: number;
     authorizedUser?: string;
     telegramApiUrl?: string;
-    telegramRequestMode?: "direct" | "proxy";
+    telegramRequestMode?: TelegramRequestMode;
     i18n?: any;
     callback: (messages: ITelegramResponse | null, error?: Error) => Promise<void> | void;
   }) {
@@ -40,15 +56,15 @@ export class Telegram {
     this.botToken = opts.botToken;
     this.updateId = opts.updateId || 0;
     this.authorizedUser = opts.authorizedUser || "";
-    this.telegramApiUrl = opts.telegramApiUrl || "https://api.telegram.org";
-    this.telegramRequestMode = opts.telegramRequestMode || "direct";
+    this.telegramApiUrl = normalizeTelegramApiUrl(opts.telegramApiUrl);
+    this.telegramRequestMode = normalizeTelegramRequestMode(opts.telegramRequestMode);
     this.callback = opts.callback;
 
     log.debug(this.i18n.log.InstanceInitialized, {
       pollingInterval: this.pollingInterval,
-      botToken: this.botToken,
+      botTokenConfigured: true,
       updateId: this.updateId,
-      authorizedUser: this.authorizedUser,
+      authorizedUserConfigured: Boolean(this.authorizedUser),
       telegramApiUrl: this.telegramApiUrl,
       telegramRequestMode: this.telegramRequestMode,
     });
@@ -84,6 +100,8 @@ export class Telegram {
     const baseUrl = this.telegramApiUrl.trim().replace(/\/+$/, "");
     const mode = this.telegramRequestMode || "direct";
     const url = `${baseUrl}${path}`;
+    const safePath = path.replace(/\/bot[^/]+/i, "/bot<redacted>");
+    const safeUrl = `${baseUrl}${safePath}`;
     const timeout = 10000; // 10s timeout
 
     if (mode === "direct") {
@@ -91,7 +109,7 @@ export class Telegram {
       const timer = setTimeout(() => controller.abort(), timeout);
 
       try {
-        log.debug(`[fetch-direct] Sending request to Telegram: ${url}`, payload);
+        log.debug(`[fetch-direct] Sending request to Telegram: ${safeUrl}`, payload);
         const options: RequestInit = {
           method,
           headers: {
@@ -117,11 +135,11 @@ export class Telegram {
         clearTimeout(timer);
         const isAbort = err.name === "AbortError";
         const errMsg = isAbort ? "Connection timeout (10s)" : err.message;
-        log.error(`[fetch-direct] Native fetch failed for ${url}:`, errMsg);
+        log.error(`[fetch-direct] Native fetch failed for ${safeUrl}:`, errMsg);
         throw new Error(errMsg);
       }
     } else {
-      log.debug(`[fetch-proxy] Sending request via Siyuan: ${url}`, payload);
+      log.debug(`[fetch-proxy] Sending request via Siyuan: ${safeUrl}`, payload);
       try {
         const proxyResponse = await forwardProxy(
           url,
@@ -228,7 +246,7 @@ export class Telegram {
       if (mode === "direct") {
         const baseUrl = this.telegramApiUrl.trim().replace(/\/+$/, "");
         const downloadUrl = `${baseUrl}/file/bot${this.botToken}/${file_path}`;
-        log.debug(`[download-direct] Downloading file: ${downloadUrl}`);
+        log.debug("[download-direct] Downloading Telegram file");
         const controller = new AbortController();
         const downloadTimer = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
@@ -249,7 +267,7 @@ export class Telegram {
       } else {
         const baseUrl = this.telegramApiUrl.trim().replace(/\/+$/, "");
         const downloadUrl = `${baseUrl}/file/bot${this.botToken}/${file_path}`;
-        log.debug(`[download-proxy] Downloading file via Siyuan: ${downloadUrl}`);
+        log.debug("[download-proxy] Downloading Telegram file via Siyuan");
         const proxyDownloadFileResponse = await forwardProxy(
           downloadUrl,
           "GET",
@@ -346,9 +364,9 @@ export class Telegram {
         const processedMessages = await Promise.all(messagePromises);
         messages = processedMessages.filter(Boolean);
       } else {
-        const errMsg = telegramResponse ? JSON.stringify(telegramResponse) : "unknown error";
-        log.error(`Telegram response not OK: ${errMsg}`);
-        return null;
+        const errorCode = telegramResponse?.error_code;
+        const description = telegramResponse?.description || "unknown error";
+        throw new Error(`Telegram API error${errorCode ? ` ${errorCode}` : ""}: ${description}`);
       }
     } catch (error) {
       log.error(this.i18n.errors.GetMessagesError, error);
