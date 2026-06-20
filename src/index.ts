@@ -21,6 +21,11 @@ import {
 } from "./libs/constants";
 import log from "./libs/logger";
 
+// 同步进行时注入顶栏图标的内联 SVG：静止的收件箱托盘 + 反复落入缺口的小信封。
+const INBOX_SYNCING_SVG_INNER = `<rect class="inbox-plus-drop" x="9" y="4" width="6" height="4.2" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+<polyline points="21 12 15.5 12 13.7 14.6 10.3 14.6 8.5 12 3 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></polyline>
+<path d="M6.2 5.1 3 12v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5l-3.2-6.9A2 2 0 0 0 16 4H8a2 2 0 0 0-1.8 1.1Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>`;
+
 type SyncStorage = {
   updateId?: number;
   lastInboxShorthands?: number;
@@ -45,6 +50,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
   private telegram?: Telegram;
   private isManualSyncing = false;
   private topBarElement?: HTMLElement;
+  private topBarIconBackup?: { html: string; viewBox: string | null };
   private inboxTimer: ReturnType<typeof setInterval> | null = null;
   private scheduledTimer: ReturnType<typeof setInterval> | null = null;
   private lastSyncedMinute = "";
@@ -279,9 +285,8 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       callback: () => this.manualRefresh(),
     });
     this.addIcons(`<symbol id="iconInboxPlus" viewBox="0 0 24 24">
-<path d="M12 3.2a6.1 6.1 0 0 0-3.3 11.25c.55.35.9.95.9 1.6v.7h4.8v-.7c0-.66.35-1.25.9-1.6A6.1 6.1 0 0 0 12 3.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path>
-<path d="M9.7 18.7h4.6M10.3 21h3.4M10 11.1h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
-<path d="M10.2 8.8 12 11l1.8-2.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+<polyline points="21 12 15.5 12 13.7 14.6 10.3 14.6 8.5 12 3 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></polyline>
+<path d="M6.2 5.1 3 12v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5l-3.2-6.9A2 2 0 0 0 16 4H8a2 2 0 0 0-1.8 1.1Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
 </symbol>`);
   }
 
@@ -403,15 +408,38 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
   private setSyncingState(syncing: boolean) {
     this.isManualSyncing = syncing;
     const el = this.getTopBarElement();
-    if (el) {
-      const svgEl = el.querySelector("svg");
-      if (syncing) {
-        svgEl?.classList.add("inbox-plus-syncing");
-        el.classList.add("inbox-plus-syncing-btn");
-      } else {
-        svgEl?.classList.remove("inbox-plus-syncing");
-        el.classList.remove("inbox-plus-syncing-btn");
+    if (!el) {
+      return;
+    }
+    const svgEl = el.querySelector("svg");
+    if (!svgEl) {
+      return;
+    }
+    if (syncing) {
+      // 顶栏图标用 <use> 引用 symbol，外部 CSS 无法单独动画 symbol 内的子元素，
+      // 因此同步时临时改成内联 SVG，让“信封落入托盘”的小动画可以作用到内部元素。
+      if (!this.topBarIconBackup) {
+        this.topBarIconBackup = {
+          html: svgEl.innerHTML,
+          viewBox: svgEl.getAttribute("viewBox"),
+        };
       }
+      svgEl.setAttribute("viewBox", "0 0 24 24");
+      svgEl.innerHTML = INBOX_SYNCING_SVG_INNER;
+      svgEl.classList.add("inbox-plus-syncing");
+      el.classList.add("inbox-plus-syncing-btn");
+    } else {
+      if (this.topBarIconBackup) {
+        svgEl.innerHTML = this.topBarIconBackup.html;
+        if (this.topBarIconBackup.viewBox !== null) {
+          svgEl.setAttribute("viewBox", this.topBarIconBackup.viewBox);
+        } else {
+          svgEl.removeAttribute("viewBox");
+        }
+        this.topBarIconBackup = undefined;
+      }
+      svgEl.classList.remove("inbox-plus-syncing");
+      el.classList.remove("inbox-plus-syncing-btn");
     }
   }
 
@@ -1233,63 +1261,48 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
         border-radius: 6px;
       }
 
-      @keyframes inbox-plus-icon-breathe {
-        0%, 100% {
-          transform: scale(0.94);
-          filter: drop-shadow(0 0 2px rgba(255, 193, 7, 0.35));
-          opacity: 0.86;
+      @keyframes inbox-plus-letter-drop {
+        0% {
+          transform: translateY(-7px);
+          opacity: 0;
         }
-        50% {
-          transform: scale(1.12);
-          filter:
-            drop-shadow(0 0 4px rgba(255, 214, 64, 1))
-            drop-shadow(0 0 9px rgba(255, 179, 0, 0.85));
+        22% {
           opacity: 1;
         }
-      }
-
-      @keyframes inbox-plus-halo-breathe {
-        0%, 100% {
-          background: rgba(255, 193, 7, 0.08);
-          box-shadow:
-            0 0 0 1px rgba(255, 193, 7, 0.12),
-            0 0 0 0 rgba(255, 193, 7, 0);
+        58% {
+          transform: translateY(2px);
+          opacity: 1;
         }
-        50% {
-          background: rgba(255, 193, 7, 0.2);
-          box-shadow:
-            0 0 0 1px rgba(255, 193, 7, 0.36),
-            0 0 0 5px rgba(255, 193, 7, 0.1),
-            0 0 14px rgba(255, 179, 0, 0.32);
+        72% {
+          transform: translateY(2px) scale(0.55);
+          opacity: 0.12;
+        }
+        73%, 100% {
+          opacity: 0;
         }
       }
 
       .inbox-plus-syncing-btn {
-        border-radius: 6px;
         color: #f9a825 !important;
-        animation: inbox-plus-halo-breathe 1.15s infinite ease-in-out;
-        transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+        transition: color 0.2s ease;
       }
 
       .inbox-plus-syncing {
         color: #f9a825 !important;
-        animation: inbox-plus-icon-breathe 1.15s infinite ease-in-out;
+      }
+
+      .inbox-plus-syncing .inbox-plus-drop {
+        transform-box: fill-box;
         transform-origin: center;
-        will-change: transform, filter, opacity;
+        animation: inbox-plus-letter-drop 1.6s infinite ease-in;
+        will-change: transform, opacity;
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .inbox-plus-syncing-btn {
+        .inbox-plus-syncing .inbox-plus-drop {
           animation: none;
-          background: rgba(255, 193, 7, 0.18);
-          box-shadow:
-            0 0 0 1px rgba(255, 193, 7, 0.32),
-            0 0 10px rgba(255, 179, 0, 0.26);
-        }
-
-        .inbox-plus-syncing {
-          animation: none;
-          filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.8));
+          transform: translateY(0);
+          opacity: 1;
         }
       }
     `;
