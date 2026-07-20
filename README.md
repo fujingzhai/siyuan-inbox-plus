@@ -48,11 +48,23 @@ This project references and draws inspiration from [shady2k/siyuan-inbox-telegra
 
 ---
 
-## Declaration
+## Support Development — Buy me a token
 
 This plugin was developed entirely using vibe coding. The tools and models utilized include:
 
 - Codex (GPT 5.5): ~50% workload
 - Antigravity (Gemini 3.5 Flash): ~50% workload
 
-Please exercise your own discretion when using this plugin.
+(The figures above are estimates from the plugin's first release; it keeps being updated, always with the most capable models available at the time.)
+
+Top-tier models are expensive and my study schedule is tight, so this work has not come easily. If you like this plugin or benefit from it, you are warmly invited to support its development. I will keep updating it and making the experience better.
+
+Please leave your LianDi (ld246) username or any other social account with your payment, and I will add you to the plugin's sponsor list as a token of my gratitude. Your support is my greatest motivation to create!
+
+| ![WeChat Pay](https://fastly.jsdelivr.net/gh/fujingzhai/siyuan-inbox-plus@main/assets/sponsor-wechat.png) | ![Alipay](https://fastly.jsdelivr.net/gh/fujingzhai/siyuan-inbox-plus@main/assets/sponsor-alipay.jpg) |
+| :---: | :---: |
+
+## Sponsors
+
+- [youxia](https://ld246.com/member/youxia)
+

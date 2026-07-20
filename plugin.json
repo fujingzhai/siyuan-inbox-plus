@@ -2,6 +2,12 @@
   "name": "siyuan-inbox-plus",
   "author": "游夏",
   "url": "https://github.com/fujingzhai/siyuan-inbox-plus",
+  "funding": {
+    "custom": [
+      "https://fastly.jsdelivr.net/gh/fujingzhai/siyuan-inbox-plus@main/assets/sponsor-wechat.png",
+      "https://fastly.jsdelivr.net/gh/fujingzhai/siyuan-inbox-plus@main/assets/sponsor-alipay.jpg"
+    ]
+  },
   "version": "0.2.9",
   "minAppVersion": "3.0.0",
   "backends": [
@@ -23,6 +29,12 @@
     "zh_CN": "README_zh_CN.md"
   },
   "keywords": [
-    "telegram", "inbox", "shorthand", "plugin", "收集箱", "同步", "导入"
+    "telegram",
+    "inbox",
+    "shorthand",
+    "plugin",
+    "收集箱",
+    "同步",
+    "导入"
   ]
 }
