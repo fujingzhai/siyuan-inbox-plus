@@ -8,7 +8,7 @@
       "https://fastly.jsdelivr.net/gh/fujingzhai/siyuan-inbox-plus@main/assets/sponsor-alipay.jpg"
     ]
   },
-  "version": "0.2.9",
+  "version": "0.2.10",
   "minAppVersion": "3.0.0",
   "backends": [
     "all"
