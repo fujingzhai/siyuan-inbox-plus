@@ -1,6 +1,8 @@
-node_modules/
-dist/
-dev/
-package.zip
-.tmp/
+*.log
 .DS_Store
+.playwright-cli/
+.tmp/
+dev/
+dist/
+node_modules/
+package.zip
