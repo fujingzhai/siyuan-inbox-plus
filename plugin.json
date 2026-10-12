@@ -8,13 +8,18 @@
       "https://fastly.jsdelivr.net/gh/fujingzhai/siyuan-inbox-plus@main/assets/sponsor-alipay.jpg"
     ]
   },
-  "version": "0.2.10",
+  "version": "0.2.11",
   "minAppVersion": "3.0.0",
   "backends": [
-    "all"
+    "windows",
+    "linux",
+    "darwin",
+    "docker"
   ],
   "frontends": [
-    "all"
+    "desktop",
+    "desktop-window",
+    "browser-desktop"
   ],
   "displayName": {
     "default": "SiYuan Inbox+",

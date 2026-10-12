@@ -84,7 +84,8 @@
         "refreshDoneLong": "Imported ${count} note(s)",
         "refreshChecked": "Checked messages",
         "refreshEmpty": "No new content",
-        "telegramFailedInboxContinued": "Telegram failed; SiYuan Inbox was still processed"
+        "telegramFailedInboxContinued": "Telegram failed; SiYuan Inbox was still processed",
+        "skippedNoTarget": "${count} item(s) were not synced: no target document or notebook is set, or the target was deleted. Please check the plugin settings."
     },
     "errors": {
         "noTargetDoc": "Bind a valid SiYuan document first",

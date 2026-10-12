@@ -1,4 +1,4 @@
-import { Plugin, showMessage, openTab } from "siyuan";
+import { Plugin, showMessage, openTab, getFrontend } from "siyuan";
 import { SettingUtils } from "./libs/setting-utils";
 import {
   Telegram,
@@ -33,6 +33,15 @@ type SyncStorage = {
 
 type MemoSource = "telegram" | "siyuan-inbox";
 
+interface SyncResult {
+  shortCount: number;
+  longCount: number;
+  // 因未设置目标（或目标已删除）而留在原处的条数
+  skippedCount: number;
+  // 本批 Telegram 消息是否全部写入成功；否则不得推进 updateId，以免消息被跳过后永久丢失
+  telegramComplete: boolean;
+}
+
 interface PendingMemo {
   type: "short" | "long";
   source: MemoSource;
@@ -56,6 +65,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
   private lastSyncedMinute = "";
   private continuousFailures = 0;
   private isPollSuspended = false;
+  private lastSkippedWarningKey = "";
 
   async onload() {
     log.info(this.i18n.helloPlugin);
@@ -83,6 +93,9 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       .then(async (loadedSettings) => {
         // 向前兼容与迁移：第一次升级时补齐新同步控制项。
         const loaded = (loadedSettings || {}) as Record<string, any>;
+        // 读不到设置文件（如新设备尚未完成首次云同步）时只用内存默认值，绝不回写：
+        // 否则这份空设置的时间戳更新，会经云同步覆盖其他设备上的正确设置。
+        const hasStoredSettings = Object.keys(loaded).length > 0;
         const hasSyncMode = Object.prototype.hasOwnProperty.call(loaded, "syncMode");
         const hasPollingInterval = Object.prototype.hasOwnProperty.call(loaded, "pollingInterval");
         const hasScheduledTime = Object.prototype.hasOwnProperty.call(loaded, "scheduledTime");
@@ -103,7 +116,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
         if (!hasScheduledTime) {
           this.settingUtils.set("scheduledTime", "");
         }
-        if (!hasSyncMode || !hasPollingInterval || !hasScheduledTime) {
+        if (hasStoredSettings && (!hasSyncMode || !hasPollingInterval || !hasScheduledTime)) {
           await this.settingUtils.save();
         }
 
@@ -303,10 +316,20 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
 
   // ─── Polling ───────────────────────────────────────────────
 
+  // 自动同步只在桌面主窗口（或浏览器桌面端）运行；多窗口、多设备同时轮询会重复导入，Telegram 也会 409。
+  private canAutoSync(): boolean {
+    const frontend = getFrontend();
+    return frontend === "desktop" || frontend === "browser-desktop";
+  }
+
   private startInboxPolling() {
     if (this.inboxTimer) {
       clearInterval(this.inboxTimer);
       this.inboxTimer = null;
+    }
+    if (!this.canAutoSync()) {
+      log.info("Automatic sync disabled on frontend:", getFrontend());
+      return;
     }
 
     const mode = String(this.settingUtils.get("syncMode") || "interval");
@@ -509,7 +532,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       const syncRes = await this.syncMemos(tgMessages, shorthands);
 
       // 4. 更新 Telegram 状态
-      if (resTG && resTG.updateId !== undefined) {
+      if (resTG && resTG.updateId !== undefined && syncRes.telegramComplete) {
         this.telegram?.setUpdateId(resTG.updateId);
         await this.persistUpdateId(resTG.updateId);
       }
@@ -524,9 +547,10 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
         );
       } else if (telegramFailed) {
         this.showUIMessage(this.i18n.messages.telegramFailedInboxContinued, 4000, "error");
-      } else {
+      } else if (syncRes.skippedCount === 0) {
         this.showUIMessage(this.i18n.messages.refreshEmpty, 3000, "info");
       }
+      this.warnSkipped(syncRes.skippedCount, true);
     } catch (error) {
       log.error(this.i18n.errors.manualRefreshError, error);
       this.showUIMessage(this.i18n.errors.manualRefreshError, 4000, "error");
@@ -550,7 +574,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
 
     const syncRes = await this.syncMemos(res.messages, []);
 
-    if (res.updateId !== undefined) {
+    if (res.updateId !== undefined && syncRes.telegramComplete) {
       this.telegram?.setUpdateId(res.updateId);
     }
 
@@ -615,7 +639,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
    * Sync Telegram messages and SiYuan inbox items together.
    * Resolves absolute created time, sorts chronologically, and prepends to target doc.
    */
-  private async syncMemos(tgMessages: IMessagesList[], inboxItems: any[]): Promise<{ shortCount: number; longCount: number }> {
+  private async syncMemos(tgMessages: IMessagesList[], inboxItems: any[]): Promise<SyncResult> {
     const pendingMemos: PendingMemo[] = [];
     const targetNotebookId = String(this.settingUtils.get("targetNotebookId") || "none").trim();
     const limit = Math.max(0, Number(this.settingUtils.get("inboxWordLimit") || 0));
@@ -674,11 +698,14 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
 
     let shortCount = 0;
     let longCount = 0;
+    let skippedCount = 0;
+    let telegramComplete = true;
 
     // 4. Process and write
     for (const memo of pendingMemos) {
       if (memo.type === "long") {
         if (memo.longNotebookId === "none" || !memo.longNotebookId) {
+          skippedCount++;
           continue;
         }
         try {
@@ -701,6 +728,10 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       } else {
         const doc = await this.getTargetDoc(memo.source);
         if (!doc) {
+          skippedCount++;
+          if (memo.source === "telegram") {
+            telegramComplete = false;
+          }
           continue;
         }
 
@@ -714,12 +745,34 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
           }
           shortCount++;
         } catch (e) {
+          if (memo.source === "telegram") {
+            telegramComplete = false;
+          }
           log.error(`Failed to sync short memo (source: ${memo.source}):`, e);
         }
       }
     }
 
-    return { shortCount, longCount };
+    return { shortCount, longCount, skippedCount, telegramComplete };
+  }
+
+  /**
+   * 有内容因未设置目标而留在原处时提示，不再静默跳过。
+   * 自动同步对同一情况只提示一次，手动同步每次都提示。
+   */
+  private warnSkipped(skippedCount: number, manual: boolean) {
+    if (skippedCount <= 0) {
+      this.lastSkippedWarningKey = "";
+      return;
+    }
+    const key = String(skippedCount);
+    if (!manual && key === this.lastSkippedWarningKey) {
+      return;
+    }
+    this.lastSkippedWarningKey = key;
+    const text = (this.i18n.messages.skippedNoTarget || "有 ${count} 条内容未搬运：未设置目标文档或笔记本，或目标已被删除")
+      .replace("${count}", String(skippedCount));
+    this.showUIMessage(text, 10000, "error", "inbox-plus-skipped");
   }
 
   // ─── Time Parse Utilities ──────────────────────────────────
@@ -1523,6 +1576,9 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       clearInterval(this.scheduledTimer);
       this.scheduledTimer = null;
     }
+    if (!this.canAutoSync()) {
+      return;
+    }
 
     const mode = String(this.settingUtils.get("syncMode") || "interval");
     if (mode !== "scheduled") {
@@ -1619,7 +1675,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
       const syncRes = await this.syncMemos(tgMessages, shorthands);
 
       // 4. Update TG state
-      if (resTG && resTG.updateId !== undefined) {
+      if (resTG && resTG.updateId !== undefined && syncRes.telegramComplete) {
         this.telegram?.setUpdateId(resTG.updateId);
         await this.persistUpdateId(resTG.updateId);
       }
@@ -1633,6 +1689,7 @@ export default class SiyuanInboxPlusPlugin extends Plugin {
           "info"
         );
       }
+      this.warnSkipped(syncRes.skippedCount, false);
     } catch (error) {
       log.error("Background scheduled sync failed:", error);
     } finally {

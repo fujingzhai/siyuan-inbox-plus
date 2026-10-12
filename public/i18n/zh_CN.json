@@ -84,7 +84,8 @@
         "refreshDoneLong": "已导入 ${count} 篇笔记",
         "refreshChecked": "已检查消息",
         "refreshEmpty": "没有新内容",
-        "telegramFailedInboxContinued": "Telegram 获取失败，已继续处理思源收集箱"
+        "telegramFailedInboxContinued": "Telegram 获取失败，已继续处理思源收集箱",
+        "skippedNoTarget": "有 ${count} 条内容未搬运：未设置目标文档或笔记本，或目标已被删除，请检查插件设置"
     },
     "errors": {
         "noTargetDoc": "请先绑定一篇有效的思源文档",

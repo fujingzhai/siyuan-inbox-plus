@@ -11,6 +11,7 @@ SiYuan Inbox+ is a powerful and lightweight information gathering assistant desi
 - **Flexible Telegram Target**: Specify a separate document target for Telegram messages, or let them fall back to the shorthand document.
 - **Native Block Writing**: Writes content as native blocks without relying on any external panels, maintaining a clean note database.
 - **Silent Background Sync**: Polls every 60 seconds by default, and can be changed anytime to a custom interval, daily schedule, or manual refresh.
+- **Desktop Only**: Runs on desktop frontends only (including browser desktop and Docker). Automatic sync runs in the main window only, so multiple windows or devices never import the same item twice; the plugin is not loaded on mobile.
 
 ## ⚙️ Core Settings
 
